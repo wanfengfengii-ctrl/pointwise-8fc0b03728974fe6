@@ -1,0 +1,12 @@
+{
+  "site": "海岬窑线",
+  "day": "2026-11-17",
+  "batch": "K2",
+  "records": [
+    {"reading": 7, "temperature": 20, "provenance": {"device": "collector-2", "log": "stack-day.log", "line": 41, "unit": "mg/m³"}},
+    {"reading": null, "temperature": 21, "provenance": {"device": "collector-2", "log": "stack-day.log", "line": 42, "unit": "mg/m³"}},
+    {"reading": 7, "temperature": 22, "provenance": {"device": "collector-2", "log": "stack-day.log", "line": 43, "unit": "mg/m³"}}
+  ],
+  "quality": ["通过", "复核", "剔除"],
+  "author": "白班质控员"
+}
