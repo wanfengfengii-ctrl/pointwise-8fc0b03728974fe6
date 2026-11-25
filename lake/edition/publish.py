@@ -1,7 +1,9 @@
+from lake.edition.anchor import seal_scope
 from lake.edition.basis import build_column_basis, build_row_register
 from lake.edition.column_codec import decode_material, encode_volume, record_digest, select_columns
 from lake.edition.issued import save_issue
 from lake.edition.planning import plan_columns
+from lake.edition.scope_grants import grant_scope, issue_scoped
 from lake.quality.revisions import load_revision
 from lake.storage import transaction
 

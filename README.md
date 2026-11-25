@@ -21,6 +21,17 @@ python3 -B demo.py
 - `lake.receiving.accept.receive(remote, raw)` 验收一个原件并返回整数实收号。`lake.receiving.ledger.list_issue_receipts(remote, revision_id, issue_id)` 查询该发行的实收号。重投同身份同核定内容复用原号，坏件抛出 `ValueError`，同身份异件抛出 `MaterialConflict`。
 - `lake.reporting.sign.reconcile_columns(remote, revision_id, receipt_ids, columns)` 签出 `SignedReport`。每行包含 `reference`、`provenance` 和 `values`。结果保留原序，`row_count` 取原行数，`non_null` 分别统计各列，零值和重复值按各自测次计入。缺件抛出 `PendingMaterials`，矛盾抛出 `MaterialConflict`，未知实收号抛出 `LookupError`。SQLite 写入错误沿原错误抛出。失败不产生报告号。`lake.reporting.retrieve.retrieve(remote, report_id)` 按号读取原成果，未知号抛出 `LookupError`。
 
+## 日志授权复核（受限交付）
+
+外部复核仅以冻结日版为起点，源仓入口位于 `lake.edition.publish`，异地签存入口位于 `lake.reporting.sign`，口径见 SCOPED_HANDOFF.md。
+
+- `seal_scope(source, revision_id)` 在任何授权前固定可复取的日版锚 `bytes`，携带版身份与该版全部冻结事实的固定摘要。相同日版重复调用及重开源库后返回同样的字节。未知日版抛出 `LookupError`。
+- `grant_scope(source, revision_id, device, log, columns)` 按单个设备、日志组合与获准列制成授权 `dict`，含 `revision_id`、`device`、`log`、`columns`、`selector` 五项，不含应到行、行数或本单摘要。日版须先封存锚，否则抛出 `LookupError`；组合在该版无观测也可授权。
+- `issue_scoped(source, grant)` 返回可搬运的 UTF-8 JSON `bytes`，只含匹配测次的原引用、出处和获准列，以及由锚摘要派生密钥的 HMAC-SHA256 `proof`。不附原行册、范围外行、未授权列或任何可凭猜值核对隐藏内容的材料。
+- `reconcile_scoped(remote, anchor, grant, raw)` 只凭异地库、独立渠道取得的锚和授权及实际运输字节核验：授权须绑定该锚的确切日版，匹配测次全部且仅出现一次，冻结原序、出处和获准列相符，证明通过。少证、漏行、重行、乱序、改值、换件、越权或串版均抛 `ValueError` 且不写报告；无匹配组合凭完整证明签零行，空读值仍列原行。
+- 签存报告沿用 `report_id`、`revision_id`、`columns`、`rows`、`row_count`、`non_null`，另以 `scope` 携带授权字典；授权、明细与每列非空数一并提交，重开远端后用 `retrieve(remote, report_id)` 复领。V1 全版报告的 `scope` 为 `None`，两类报告在同一报告目录共存。
+
+
 ## 交接及核账口径
 
 V1 件具有 `version`、`revision_id`、`issue_id`、`kind`、`body` 和 `digest`。内容标识是去掉 `digest` 后规范 JSON 的 SHA-256，规范 JSON 使用 ASCII 转义、键排序及紧凑分隔。`volume` 正文含列名、物理卷号和本卷实值。数值按值及原序排序，质控按剔除、通过、复核及原序排序。读值每卷一项，质控和温度每卷最多两项。`row_register` 保全原序测次与出处，`column_basis` 引用原行册正文标识并记录各卷标识、卷内行号与确证空行号。行号从 1 开始，指该原行册中的原测次。

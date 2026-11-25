@@ -2,6 +2,7 @@ from lake.receiving.coverage import resolve_coverage
 from lake.receiving.reconstruct import reconstruct_rows
 from lake.reporting.requests import validate_request
 from lake.reporting.rollup import count_non_null
+from lake.reporting.scoped_reconcile import reconcile_scoped
 from lake.reporting.store import commit_report
 from lake.storage import transaction
 

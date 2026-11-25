@@ -42,13 +42,15 @@ def _open(path, initializers):
 
 
 def open_source(path):
+    from lake.edition.anchor import initialize_anchors
     from lake.edition.issued import initialize_issued
     from lake.intake.store import initialize_intake
     from lake.quality.amendments import initialize_amendments
     from lake.quality.revisions import initialize_revisions
 
     return _open(path, (initialize_intake, initialize_amendments,
-                        initialize_revisions, initialize_issued))
+                        initialize_revisions, initialize_issued,
+                        initialize_anchors))
 
 
 def open_remote(path):
